@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  master:
+    build: 
+      context: ./images
+      dockerfile: master.Dockerfile
+    ports:
+      - '5432:5432'
+    dns: 
+      - 10.202.10.202
+  slave:
+    build: 
+      context: ./images
+      dockerfile: slave.Dockerfile
+    ports:
+      - '5432'
+    dns: 
+      - 10.202.10.202
+    depends_on: 
+      - master
+

@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: master
+  labels: 
+    rep-type: master-db-production 
+    env: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      rep-type: master-db-production 
+      env: myapp
+  template:
+    metadata:
+      name: master
+      labels: 
+        rep-type: master-db-production 
+        env: myapp
+    spec:
+      containers:
+      - name: master
+        image: master_postgres:1.0.0
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "1000m"
+        ports: 
+        - containerPort: 5432
+          name: master-db
+
+---
+apiVersion: v1
+kind: Service 
+metadata:
+  name: master
+spec:
+  # type: NodePort
+  clusterIP: None
+  ports: 
+  - port: 5432
+    targetPort: master-db
+    # nodePort: 30005
+  selector: 
+    rep-type: master-db-production 
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slave
+  labels: 
+    rep-type: slave-db-production 
+    env: myapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      rep-type: slave-db-production 
+      env: myapp
+  template:
+    metadata:
+      name: slave
+      labels: 
+        rep-type: slave-db-production 
+        env: myapp
+    spec:
+      containers:
+      - name: slave
+        image: slave_postgres:1.0.0
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "1000m"
+        ports: 
+        - containerPort: 5432
+          name: slave-db
+
+---
+apiVersion: v1
+kind: Service 
+metadata:
+  name: slave
+spec:
+  # type: NodePort
+  clusterIP: None
+  ports: 
+  - port: 5432
+    targetPort: slave-db
+    # nodePort: 30004
+  selector: 
+    rep-type: slave-db-production 
+
+
+
+
